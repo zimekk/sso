@@ -1,43 +1,37 @@
-import React, { Suspense, lazy, useEffect, useState } from "react";
+import React, { Suspense } from "react";
 import { hot } from "react-hot-loader/root";
-import history from "history/browser";
+import { createAsset } from "use-asset";
 import styles from "./App.module.scss";
 
 const Spinner = () => <span>Loading...</span>;
 
-const PAGES = {
-  hello: lazy(() => import("./Hello")),
-};
+const asset = createAsset(async () => {
+  const res = await fetch(`user`);
+  return await res.json();
+});
 
-const getPage = (location: { hash: string }) => {
-  const [, hash = Object.keys(PAGES)[0]] =
-    decodeURI(location.hash).match(/^#(.+)/) || [];
-  return hash;
-};
+function Section() {
+  const { user } = asset.read();
+  return (
+    <section className={styles.Section}>
+      <pre>{JSON.stringify({ user }, null, 2)}</pre>
+      <nav>
+        {user ? (
+          <a href="/logout">Logout</a>
+        ) : (
+          <a href="/auth/google">Sign In with Google</a>
+        )}
+      </nav>
+    </section>
+  );
+}
 
 function App() {
-  const [page, setPage] = useState(getPage(history.location));
-
-  useEffect(() =>
-    // location is an object like window.location
-    history.listen(({ location }) => setPage(getPage(location)))
-  );
-
-  const Page = PAGES[page] || null;
-
   return (
     <section className={styles.App}>
-      <h1 className={styles.Nav}>
-        Hello
-        {Object.keys(PAGES).map((page) => (
-          <a key={page} href={`#${page}`}>
-            {page}
-          </a>
-        ))}
-        [{page}]
-      </h1>
+      <h1 className={styles.Nav}>sso</h1>
       <Suspense fallback={<Spinner />}>
-        <Page />
+        <Section />
       </Suspense>
     </section>
   );

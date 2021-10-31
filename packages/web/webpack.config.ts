@@ -9,8 +9,6 @@ export default (env, { mode }, dev = mode === "development") => ({
   devtool: dev ? "eval-cheap-source-map" : "source-map",
   entry: {
     main: require.resolve("./src"),
-    // : require.resolve("./src"),
-    sw: require.resolve("./src/service-worker"),
   },
   module: {
     rules: [
@@ -69,29 +67,18 @@ export default (env, { mode }, dev = mode === "development") => ({
     new webpack.ProvidePlugin({
       Buffer: ["buffer", "Buffer"],
     }),
-    // https://webpack.js.org/plugins/copy-webpack-plugin/
-    // new (require("copy-webpack-plugin"))({
-    //   patterns: [
-    //     { from: require.resolve("./src/manifest.json"),       },
-    //   ],
-    // }),
-    // https://github.com/jantimon/favicons-webpack-plugin#basic
-    new (require("favicons-webpack-plugin"))({
-      logo: require.resolve("./src/assets/favicon.ico"),
-      // https://web.dev/add-manifest/
-      // https://felixgerschau.com/how-to-make-your-react-app-a-progressive-web-app-pwa/#adding-a-manifest-file
-      manifest: require.resolve("./src/assets/manifest.json"),
-      mode: "light",
+    new (require("copy-webpack-plugin"))({
+      patterns: [
+        {
+          context: path.resolve(__dirname, "src/assets"),
+          from: "user.json",
+          to: "[name]",
+        },
+      ],
     }),
     // https://webpack.js.org/plugins/html-webpack-plugin/
     new (require("html-webpack-plugin"))({
-      excludeChunks: ["sw"],
-      // favicon: require.resolve("./src/assets/favicon.ico"),
+      favicon: require.resolve("./src/assets/favicon.ico"),
     }),
-    // !dev &&
-    //   new (require("workbox-webpack-plugin").InjectManifest)({
-    //     swSrc: require.resolve("./src/service-worker"),
-    //     swDest: "sw.js",
-    //   }),
   ].filter(Boolean),
 });

@@ -1,9 +1,9 @@
 import path from "path";
 import express, { Router } from "express";
 
-export const router = Router().use("/api", (req, res) =>
-  res.json({ hello: "Hello" })
-);
+export const router = Router()
+  .use(require("./auth").default())
+  .use("/user", (req, res) => res.json({ user: req.user }));
 
 class Server {
   options: Object;

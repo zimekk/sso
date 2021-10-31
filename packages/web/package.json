@@ -23,7 +23,8 @@
     "immutability-helper": "^3.1.1",
     "raf": "^3.4.1",
     "react": "^17.0.2",
-    "react-dom": "^17.0.2"
+    "react-dom": "^17.0.2",
+    "use-asset": "^1.0.4"
   },
   "devDependencies": {
     "@babel/core": "^7.16.0",

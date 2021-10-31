@@ -1,0 +1,11 @@
+{
+  "user": {
+    "id": "...",
+    "displayName": "Marcin M",
+    "name": {
+      "familyName": "M",
+      "givenName": "Marcin"
+    },
+    "provider": "google"
+  }
+}
