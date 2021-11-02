@@ -19,7 +19,14 @@ function Section() {
         {user ? (
           <a href="/logout">Logout</a>
         ) : (
-          <a href="/auth/google">Sign In with Google</a>
+          <ul>
+            <li>
+              <a href="/auth/github">Sign In with GitHub</a>
+            </li>
+            <li>
+              <a href="/auth/google">Sign In with Google</a>
+            </li>
+          </ul>
         )}
       </nav>
     </section>
