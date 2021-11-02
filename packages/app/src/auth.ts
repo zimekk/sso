@@ -1,7 +1,9 @@
 import { Router } from "express";
+import jwt from "jsonwebtoken";
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as GitHubStrategy } from "passport-github";
+import { ExtractJwt, Strategy as JwtStrategy } from "passport-jwt";
 
 const {
   // https://console.cloud.google.com/
@@ -11,8 +13,10 @@ const {
 } = require("../config");
 
 const COOKIE_SECRET = "secret";
+const JWT_SECRET = "secret";
 
 const User = {
+  findOne: ({ id }, done) => done(null, { id, name: `User #${id}` }),
   findOrCreate: (
     { id, displayName, name, username, profileUrl, provider },
     done
@@ -49,14 +53,9 @@ passport
       function (accessToken, refreshToken, profile, done) {
         console.log(["GoogleStrategy"], { accessToken, refreshToken, profile });
 
-        Promise.resolve(profile)
-          .then(({ id, displayName, name, provider }) => ({
-            id,
-            displayName,
-            name,
-            provider,
-          }))
-          .then((user) => done(null, user));
+        User.findOrCreate(profile, function (err, user) {
+          return done(err, user);
+        });
       }
     )
   )
@@ -72,6 +71,22 @@ passport
         console.log(["GitHubStrategy"], { accessToken, refreshToken, profile });
 
         User.findOrCreate(profile, function (err, user) {
+          return done(err, user);
+        });
+      }
+    )
+  )
+  .use(
+    // https://github.com/mikenicholson/passport-jwt#configure-strategy
+    new JwtStrategy(
+      {
+        jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+        secretOrKey: JWT_SECRET,
+      },
+      function (jwt_payload, done) {
+        console.log(["JwtStrategy"], { jwt_payload });
+
+        User.findOne({ id: jwt_payload.sub }, function (err, user) {
           return done(err, user);
         });
       }
@@ -129,4 +144,24 @@ export default () =>
     .get("/logout", (req, res) => {
       req.logout();
       res.redirect("/");
+    })
+    // https://github.com/mikenicholson/passport-jwt#authenticate-requests
+    .get(
+      "/jwt/profile",
+      passport.authenticate("jwt", { session: false }),
+      (req, res) => {
+        res.send(req.user);
+      }
+    )
+    .get("/jwt/login/:id", (req, res, next) => {
+      const { id } = req.params;
+      User.findOne({ id }, function (_err, user) {
+        req.login(user, { session: false }, async (err) => {
+          if (err) return next(err);
+
+          const token = jwt.sign({ sub: user.id }, JWT_SECRET);
+
+          return res.json({ token });
+        });
+      });
     });
