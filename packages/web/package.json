@@ -18,7 +18,7 @@
     "buffer": "^6.0.3",
     "classnames": "^2.3.1",
     "events": "^3.3.0",
-    "history": "^5.0.1",
+    "history": "^5.0.3",
     "hoist-non-react-statics": "^3.3.2",
     "immutability-helper": "^3.1.1",
     "raf": "^3.4.1",
