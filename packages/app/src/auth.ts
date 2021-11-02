@@ -119,7 +119,7 @@ export default () =>
     .get(
       "/auth/github/callback",
       passport.authenticate("github", { failureRedirect: "/login" }),
-      function (req, res) {
+      function (_req, res) {
         // Successful authentication, redirect home.
         res.redirect("/");
       }
@@ -131,7 +131,7 @@ export default () =>
     .get(
       "/auth/google/callback",
       passport.authenticate("google", { failureRedirect: "/login" }),
-      function (req, res) {
+      function (_req, res) {
         // Successful authentication, redirect home.
         res.redirect("/");
       }

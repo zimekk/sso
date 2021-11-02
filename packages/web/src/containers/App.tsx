@@ -20,16 +20,16 @@ function Sso() {
         {user ? (
           <ul>
             <li>
-              <a href="/logout">Logout</a>
+              <a href="logout">Logout</a>
             </li>
           </ul>
         ) : (
           <ul>
             <li>
-              <a href="/auth/github">Sign In with GitHub</a>
+              <a href="auth/github">Sign In with GitHub</a>
             </li>
             <li>
-              <a href="/auth/google">Sign In with Google</a>
+              <a href="auth/google">Sign In with Google</a>
             </li>
           </ul>
         )}
@@ -38,33 +38,29 @@ function Sso() {
   );
 }
 
-const authorization = {
-  token: null,
-};
-
-const login = async (id) => {
-  const res = await fetch(`jwt/login/${id}`);
-  return await res
-    .json()
-    .then(({ token }) => Object.assign(authorization, { token }));
-};
-
-const profile = async () => {
-  const res = await fetch(`jwt/profile`, {
-    headers: authorization.token
-      ? {
-          authorization: `Bearer ${authorization.token}`,
-        }
-      : {},
-  });
-  return await res.json();
-};
-
 function Jwt() {
   const [user, setUser] = useState(undefined);
+  const [token, setToken] = useState(undefined);
 
-  const handleLogin = useCallback(() => login(1), []);
-  const handleProfile = useCallback(() => profile().then(setUser), []);
+  const handleLogin = useCallback(async () => {
+    const id = 1;
+    const res = await fetch(`jwt/login/${id}`);
+    await res.json().then(({ token }) => setToken(token));
+  }, []);
+  const handleLogout = useCallback(() => {
+    setUser(undefined);
+    setToken(undefined);
+  }, []);
+  const handleProfile = useCallback(async () => {
+    const res = await fetch(`jwt/profile`, {
+      headers: token
+        ? {
+            authorization: `Bearer ${token}`,
+          }
+        : {},
+    });
+    return await res.json().then(setUser);
+  }, [token]);
 
   return (
     <section className={styles.Section}>
@@ -72,11 +68,16 @@ function Jwt() {
       <nav>
         <ul>
           <li>
-            <button onClick={handleLogin}>login</button>
+            <button onClick={handleLogin}>Sign In</button>
           </li>
           <li>
-            <button onClick={handleProfile}>profile</button>
+            <button onClick={handleProfile}>User Profile</button>
           </li>
+          {token && (
+            <li>
+              <button onClick={handleLogout}>Logout</button>
+            </li>
+          )}
         </ul>
       </nav>
     </section>
